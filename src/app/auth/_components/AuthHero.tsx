@@ -26,9 +26,9 @@ export function AuthHero({ variant }: AuthHeroProps) {
       <BrandMark />
 
       <div className="relative z-10">
-        <h1 className="mb-3.5 max-w-[22ch] font-display text-[42px] font-bold leading-[1.05] tracking-[-0.02em] text-balance">
+        <h2 className="mb-3.5 max-w-[22ch] font-display text-[42px] font-bold leading-[1.05] tracking-[-0.02em] text-balance">
           {copy.heroTitle}
-        </h1>
+        </h2>
         <p className="mb-7 max-w-[42ch] text-[15.5px] leading-[1.55] text-white/85">
           {copy.heroDescription}
         </p>
