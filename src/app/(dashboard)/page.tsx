@@ -1,19 +1,51 @@
-import { Plus, MoreVertical } from 'lucide-react'
-import {
-  DASHBOARD_BALANCE,
-  DASHBOARD_EXPENSES,
-  DASHBOARD_HEADER,
-  DASHBOARD_QUOTE,
-  DASHBOARD_RESIDENTS,
-} from './_components/dashboardMocks'
+"use client"
+
+import { useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { MoreVertical, Plus } from 'lucide-react'
+import { useGroupContext } from '@/contexts/group-context'
+import { useExpenses } from '@/features/grupos/hooks/useExpenses'
+import { useBalances } from '@/features/grupos/hooks/useBalances'
 import { HeroBanner } from './_components/HeroBanner'
 import { ExpensesCard } from './_components/ExpensesCard'
 import { BalanceCard } from './_components/BalanceCard'
 import { MembersCard } from './_components/MembersCard'
 import { QuoteCard } from './_components/QuoteCard'
 import { AppFooter } from './_components/AppFooter'
+import { DASHBOARD_HEADER, DASHBOARD_QUOTE } from './_components/dashboardMocks'
+import { toBalanceSummary, toResidents, toUiExpenses } from './_components/dashboardAdapters'
+import { DashboardLoadingSkeleton, DashboardEmptyState } from './_components/DashboardStates'
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const { activeGroup, activeGroupPublicId, needsOnboarding, isLoadingGroups } = useGroupContext()
+  const { expenses: apiExpenses, fetchExpenses } = useExpenses(activeGroupPublicId)
+  const { settlements, fetchBalances } = useBalances(activeGroupPublicId)
+
+  useEffect(() => {
+    if (needsOnboarding) router.replace('/onboarding')
+  }, [needsOnboarding, router])
+
+  useEffect(() => {
+    if (!activeGroupPublicId) return
+    fetchExpenses({ page: 1, pageSize: 50 })
+    fetchBalances()
+  }, [activeGroupPublicId, fetchExpenses, fetchBalances])
+
+  const residents = useMemo(
+    () => (activeGroup ? toResidents(activeGroup.members) : []),
+    [activeGroup],
+  )
+  const uiExpenses = useMemo(
+    () => toUiExpenses(apiExpenses, residents),
+    [apiExpenses, residents],
+  )
+  const balanceSummary = useMemo(() => toBalanceSummary(settlements), [settlements])
+
+  if (isLoadingGroups) return <DashboardLoadingSkeleton />
+  if (needsOnboarding) return null
+  if (!activeGroup) return <DashboardEmptyState />
+
   return (
     <>
       <MobileActionRow />
@@ -26,12 +58,14 @@ export default function DashboardPage() {
               subGreeting={DASHBOARD_HEADER.subGreeting}
             />
           </div>
-          <ExpensesCard expenses={DASHBOARD_EXPENSES} residents={DASHBOARD_RESIDENTS} />
+          <ExpensesCard expenses={uiExpenses} residents={residents} />
         </div>
 
         <aside className="hidden space-y-6 lg:col-span-4 lg:block">
-          <BalanceCard summary={DASHBOARD_BALANCE} />
-          <MembersCard residents={DASHBOARD_RESIDENTS} />
+          {balanceSummary
+            ? <BalanceCard summary={balanceSummary} />
+            : <BalanceSettled />}
+          <MembersCard residents={residents} />
           <QuoteCard text={DASHBOARD_QUOTE} />
         </aside>
       </div>
@@ -70,5 +104,33 @@ function MobileActionRow() {
         <MoreVertical className="h-4 w-4" aria-hidden />
       </button>
     </div>
+  )
+}
+
+function BalanceSettled() {
+  return (
+    <article
+      className="rounded-2xl border-2 p-6 text-center"
+      style={{
+        background: 'var(--cozy-grad-card)',
+        borderColor: 'var(--cozy-border-hair)',
+      }}
+    >
+      <p
+        className="font-display text-[12px] font-bold uppercase tracking-[0.08em]"
+        style={{ color: 'var(--cozy-fg-label)' }}
+      >
+        Resumo do mês
+      </p>
+      <p
+        className="mt-3 font-display text-[20px] font-bold leading-tight"
+        style={{ color: 'var(--sage-600)' }}
+      >
+        Tudo quitado.
+      </p>
+      <p className="mt-1 text-[13px]" style={{ color: 'var(--cozy-fg-secondary)' }}>
+        Nenhuma dívida pendente entre os moradores.
+      </p>
+    </article>
   )
 }
