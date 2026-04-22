@@ -1,13 +1,16 @@
+"use client"
+
 import { Scale, Wallet } from 'lucide-react'
 import { formatCurrency } from '@/lib/currency'
 import type { BalanceSummary } from './dashboardMocks'
 
 interface BalanceCardProps {
   summary: BalanceSummary
+  onSettleUp?: () => void
 }
 
 /** "Resumo do Mês" card showing who owes whom and a settle-up CTA. */
-export function BalanceCard({ summary }: BalanceCardProps) {
+export function BalanceCard({ summary, onSettleUp }: BalanceCardProps) {
   return (
     <article
       className="relative overflow-hidden rounded-2xl border-2 p-6"
@@ -56,7 +59,9 @@ export function BalanceCard({ summary }: BalanceCardProps) {
 
       <button
         type="button"
-        className="relative z-10 mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-display font-bold text-white transition-transform active:scale-[0.98]"
+        onClick={onSettleUp}
+        disabled={!onSettleUp}
+        className="relative z-10 mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-display font-bold text-white transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         style={{
           background: 'linear-gradient(180deg, var(--amber-600) 0%, var(--amber-700) 100%)',
           boxShadow: 'var(--cozy-shadow-btn)',

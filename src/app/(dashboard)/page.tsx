@@ -15,6 +15,7 @@ import { MembersCard } from './_components/MembersCard'
 import { QuoteCard } from './_components/QuoteCard'
 import { AppFooter } from './_components/AppFooter'
 import { ExpenseFormModal, type ExpenseInput } from './_components/ExpenseFormModal'
+import { SettleUpModal } from './_components/SettleUpModal'
 import { DASHBOARD_HEADER, DASHBOARD_QUOTE } from './_components/dashboardMocks'
 import { toBalanceSummary, toResidents, toUiExpenses } from './_components/dashboardAdapters'
 import { DashboardLoadingSkeleton, DashboardEmptyState } from './_components/DashboardStates'
@@ -34,6 +35,7 @@ export default function DashboardPage() {
   const { settlements, fetchBalances } = useBalances(activeGroupPublicId)
 
   const [expenseModalOpen, setExpenseModalOpen] = useState(false)
+  const [settleUpModalOpen, setSettleUpModalOpen] = useState(false)
 
   useEffect(() => {
     if (needsOnboarding) router.replace('/onboarding')
@@ -140,7 +142,7 @@ export default function DashboardPage() {
 
         <aside className="hidden space-y-6 lg:col-span-4 lg:block">
           {balanceSummary
-            ? <BalanceCard summary={balanceSummary} />
+            ? <BalanceCard summary={balanceSummary} onSettleUp={() => setSettleUpModalOpen(true)} />
             : <BalanceSettled />}
           <MembersCard residents={residents} />
           <QuoteCard text={DASHBOARD_QUOTE} />
@@ -156,6 +158,12 @@ export default function DashboardPage() {
         onSubmit={handleSubmitExpense}
         loading={expensesLoading}
         error={expensesError}
+      />
+
+      <SettleUpModal
+        open={settleUpModalOpen}
+        onClose={() => setSettleUpModalOpen(false)}
+        settlements={settlements}
       />
     </>
   )
