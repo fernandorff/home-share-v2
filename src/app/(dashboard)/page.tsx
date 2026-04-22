@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { MoreVertical, Plus } from 'lucide-react'
+import { Download, Plus } from 'lucide-react'
 import { useGroupContext } from '@/contexts/group-context'
 import { useExpenses } from '@/features/grupos/hooks/useExpenses'
 import { useBalances } from '@/features/grupos/hooks/useBalances'
+import type { MenuOption } from '@/components/ui/OptionsMenu'
+import { OptionsMenu } from '@/components/ui/OptionsMenu'
 import { HeroBanner } from './_components/HeroBanner'
 import { ExpensesCard } from './_components/ExpensesCard'
 import { BalanceCard } from './_components/BalanceCard'
@@ -76,13 +78,42 @@ export default function DashboardPage() {
     [createExpense, fetchBalances],
   )
 
+  const handleExportCSV = useCallback(async () => {
+    if (!activeGroupPublicId) return
+    const response = await fetch(`/api/groups/${activeGroupPublicId}/expenses/export`)
+    if (!response.ok) {
+      console.error('Falha ao exportar despesas')
+      return
+    }
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const disposition = response.headers.get('content-disposition')
+    const match = disposition?.match(/filename="([^"]+)"/)
+    const filename = match?.[1] ?? 'despesas.csv'
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = filename
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+    URL.revokeObjectURL(url)
+  }, [activeGroupPublicId])
+
+  const menuOptions = useMemo<ReadonlyArray<MenuOption>>(
+    () => [{ label: 'Exportar CSV', icon: Download, onClick: handleExportCSV }],
+    [handleExportCSV],
+  )
+
   if (isLoadingGroups) return <DashboardLoadingSkeleton />
   if (needsOnboarding) return null
   if (!activeGroup) return <DashboardEmptyState />
 
   return (
     <>
-      <MobileActionRow onCreateExpense={handleOpenExpenseModal} />
+      <MobileActionRow
+        onCreateExpense={handleOpenExpenseModal}
+        menuOptions={menuOptions}
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         <div className="space-y-6 lg:col-span-8">
@@ -96,6 +127,7 @@ export default function DashboardPage() {
             expenses={uiExpenses}
             residents={residents}
             onCreateExpense={handleOpenExpenseModal}
+            menuOptions={menuOptions}
           />
         </div>
 
@@ -124,9 +156,10 @@ export default function DashboardPage() {
 
 interface MobileActionRowProps {
   onCreateExpense: () => void
+  menuOptions: ReadonlyArray<MenuOption>
 }
 
-function MobileActionRow({ onCreateExpense }: MobileActionRowProps) {
+function MobileActionRow({ onCreateExpense, menuOptions }: MobileActionRowProps) {
   return (
     <div className="mb-5 flex gap-3 md:hidden">
       <button
@@ -142,19 +175,10 @@ function MobileActionRow({ onCreateExpense }: MobileActionRowProps) {
         <Plus className="h-5 w-5" aria-hidden strokeWidth={2.4} />
         Nova despesa
       </button>
-      <button
-        type="button"
-        aria-label="Mais opções"
-        className="flex h-12 w-12 items-center justify-center rounded-xl border transition-transform active:scale-95"
-        style={{
-          background: 'rgba(255, 255, 255, 0.5)',
-          borderColor: 'var(--cozy-border-hair)',
-          boxShadow: 'var(--cozy-shadow-xs)',
-          color: 'var(--terracotta-700)',
-        }}
-      >
-        <MoreVertical className="h-4 w-4" aria-hidden />
-      </button>
+      <OptionsMenu
+        options={menuOptions}
+        triggerClassName="flex h-12 w-12 items-center justify-center rounded-xl border transition-transform active:scale-95"
+      />
     </div>
   )
 }

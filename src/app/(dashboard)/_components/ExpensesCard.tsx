@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from 'react'
-import { Cat, LayoutList, MoreVertical, Plus, Users } from 'lucide-react'
+import { Cat, LayoutList, Plus, Users } from 'lucide-react'
+import { OptionsMenu, type MenuOption } from '@/components/ui/OptionsMenu'
 import { ExpensesTable } from './ExpensesTable'
 import { ExpensesList } from './ExpensesList'
 import { ExpensesByPersonView } from './ExpensesByPersonView'
@@ -13,6 +14,7 @@ interface ExpensesCardProps {
   expenses: ReadonlyArray<Expense>
   residents: ReadonlyArray<Resident>
   onCreateExpense?: () => void
+  menuOptions?: ReadonlyArray<MenuOption>
 }
 
 /**
@@ -21,7 +23,7 @@ interface ExpensesCardProps {
  * pessoa); "Nova despesa" click is delegated to the parent via
  * onCreateExpense so the modal lives in the page.
  */
-export function ExpensesCard({ expenses, residents, onCreateExpense }: ExpensesCardProps) {
+export function ExpensesCard({ expenses, residents, onCreateExpense, menuOptions }: ExpensesCardProps) {
   const [viewMode, setViewMode] = useState<ExpensesViewMode>('table')
 
   return (
@@ -34,7 +36,12 @@ export function ExpensesCard({ expenses, residents, onCreateExpense }: ExpensesC
       }}
     >
       <Header onCreateExpense={onCreateExpense} />
-      <Toolbar count={expenses.length} viewMode={viewMode} onViewModeChange={setViewMode} />
+      <Toolbar
+        count={expenses.length}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        menuOptions={menuOptions}
+      />
 
       {viewMode === 'table' ? (
         <>
@@ -99,9 +106,10 @@ interface ToolbarProps {
   count: number
   viewMode: ExpensesViewMode
   onViewModeChange: (next: ExpensesViewMode) => void
+  menuOptions?: ReadonlyArray<MenuOption>
 }
 
-function Toolbar({ count, viewMode, onViewModeChange }: ToolbarProps) {
+function Toolbar({ count, viewMode, onViewModeChange, menuOptions }: ToolbarProps) {
   return (
     <div
       className="flex items-center justify-between border-b px-6 py-2.5"
@@ -119,14 +127,11 @@ function Toolbar({ count, viewMode, onViewModeChange }: ToolbarProps) {
         </span>
         <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
       </div>
-      <button
-        type="button"
-        aria-label="Mais opções"
-        className="hidden rounded-md p-1 transition-colors hover:bg-[oklch(0.72_0.12_75/0.12)] md:inline-flex"
-        style={{ color: 'var(--cozy-fg-muted)' }}
-      >
-        <MoreVertical className="h-[18px] w-[18px]" aria-hidden />
-      </button>
+      {menuOptions && menuOptions.length > 0 && (
+        <div className="hidden md:block">
+          <OptionsMenu options={menuOptions} />
+        </div>
+      )}
     </div>
   )
 }
