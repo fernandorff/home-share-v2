@@ -35,8 +35,16 @@ may be needed on Windows and when the dev server grabs a non-default port.
 | `test_auth_pages.py` | Sign-in / Sign-up visual contracts, ptBR placeholders | 8 |
 | `test_dashboard_shell.py` | Route-group layout, empty states, nav placeholders, mobile FAB href | 11 |
 | `test_dashboard_interactions.py` | Modals (Nova despesa, Settle up), view toggle, kebab menu — uses `page.route` to stub the API | 8 |
+| `test_accessibility.py` | axe-core WCAG 2.2 AA audit on every route (fails on serious/critical) | 7 |
+| `test_responsive_snapshots.py` | Screenshot every route at desktop+tablet+mobile, assert non-blank size | 21 |
+| `test_keyboard_and_forms.py` | ESC/Tab on modals, form validation, masked amount, split preview | 11 |
 
-**Total: 34 checks.**
+**Total: 73 checks.**
+
+Skills behind the harness:
+- [`anthropics/skills@webapp-testing`](https://skills.sh/anthropics/skills/webapp-testing) — Playwright recon-then-action pattern.
+- [`addyosmani/web-quality-skills@accessibility`](https://skills.sh/addyosmani/web-quality-skills/accessibility) — WCAG 2.2 POUR principles + axe integration.
+- [`bencium/bencium-marketplace@design-audit`](https://skills.sh/bencium/bencium-marketplace/design-audit) — visual audit heuristics used when writing assertions.
 
 ## Gotchas
 
