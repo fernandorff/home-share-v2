@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "db:studio": "npx prisma studio"
   },
   "dependencies": {
     "@clerk/localizations": "^4.5.2",
