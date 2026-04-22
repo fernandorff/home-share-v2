@@ -1,19 +1,29 @@
+"use client"
+
+import { useState } from 'react'
 import { Cat, LayoutList, MoreVertical, Plus, Users } from 'lucide-react'
 import { ExpensesTable } from './ExpensesTable'
 import { ExpensesList } from './ExpensesList'
+import { ExpensesByPersonView } from './ExpensesByPersonView'
 import type { Expense, Resident } from './dashboardMocks'
+
+export type ExpensesViewMode = 'table' | 'by-person'
 
 interface ExpensesCardProps {
   expenses: ReadonlyArray<Expense>
   residents: ReadonlyArray<Resident>
+  onCreateExpense?: () => void
 }
 
 /**
  * Expense panel — glass card with header, toolbar and a table on desktop or
- * a card list on mobile. View toggle, options menu and primary action are
- * rendered as static visuals for now; wiring lands in a later phase.
+ * a card list on mobile. Owns the view-mode client state (Tabela vs Por
+ * pessoa); "Nova despesa" click is delegated to the parent via
+ * onCreateExpense so the modal lives in the page.
  */
-export function ExpensesCard({ expenses, residents }: ExpensesCardProps) {
+export function ExpensesCard({ expenses, residents, onCreateExpense }: ExpensesCardProps) {
+  const [viewMode, setViewMode] = useState<ExpensesViewMode>('table')
+
   return (
     <section
       className="overflow-hidden rounded-2xl border backdrop-blur-sm"
@@ -23,22 +33,30 @@ export function ExpensesCard({ expenses, residents }: ExpensesCardProps) {
         boxShadow: 'var(--cozy-shadow-card, var(--cozy-shadow-xs))',
       }}
     >
-      <Header />
-      <Toolbar count={expenses.length} />
+      <Header onCreateExpense={onCreateExpense} />
+      <Toolbar count={expenses.length} viewMode={viewMode} onViewModeChange={setViewMode} />
 
-      <div className="hidden md:block">
-        <ExpensesTable expenses={expenses} residents={residents} />
-      </div>
-      <div className="md:hidden pt-3">
-        <ExpensesList expenses={expenses} residents={residents} />
-      </div>
-
-      <LoadMoreFooter />
+      {viewMode === 'table' ? (
+        <>
+          <div className="hidden md:block">
+            <ExpensesTable expenses={expenses} residents={residents} />
+          </div>
+          <div className="md:hidden pt-3">
+            <ExpensesList expenses={expenses} residents={residents} />
+          </div>
+        </>
+      ) : (
+        <ExpensesByPersonView expenses={expenses} residents={residents} />
+      )}
     </section>
   )
 }
 
-function Header() {
+interface HeaderProps {
+  onCreateExpense?: () => void
+}
+
+function Header({ onCreateExpense }: HeaderProps) {
   return (
     <div
       className="flex flex-col gap-3 border-b px-6 py-5 md:flex-row md:items-center md:justify-between"
@@ -59,22 +77,31 @@ function Header() {
         </h2>
       </div>
 
-      <button
-        type="button"
-        className="hidden items-center gap-2 rounded-xl px-4 py-2 font-display text-[13px] font-bold text-white transition-transform active:scale-95 md:flex"
-        style={{
-          background: 'var(--cozy-grad-btn)',
-          boxShadow: 'var(--cozy-shadow-btn)',
-        }}
-      >
-        <Plus className="h-4 w-4" aria-hidden strokeWidth={2.4} />
-        Nova despesa
-      </button>
+      {onCreateExpense && (
+        <button
+          type="button"
+          onClick={onCreateExpense}
+          className="hidden items-center gap-2 rounded-xl px-4 py-2 font-display text-[13px] font-bold text-white transition-transform active:scale-95 md:flex"
+          style={{
+            background: 'var(--cozy-grad-btn)',
+            boxShadow: 'var(--cozy-shadow-btn)',
+          }}
+        >
+          <Plus className="h-4 w-4" aria-hidden strokeWidth={2.4} />
+          Nova despesa
+        </button>
+      )}
     </div>
   )
 }
 
-function Toolbar({ count }: { count: number }) {
+interface ToolbarProps {
+  count: number
+  viewMode: ExpensesViewMode
+  onViewModeChange: (next: ExpensesViewMode) => void
+}
+
+function Toolbar({ count, viewMode, onViewModeChange }: ToolbarProps) {
   return (
     <div
       className="flex items-center justify-between border-b px-6 py-2.5"
@@ -90,7 +117,7 @@ function Toolbar({ count }: { count: number }) {
         >
           Despesas ({count})
         </span>
-        <ViewToggle />
+        <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
       </div>
       <button
         type="button"
@@ -104,7 +131,12 @@ function Toolbar({ count }: { count: number }) {
   )
 }
 
-function ViewToggle() {
+interface ViewToggleProps {
+  viewMode: ExpensesViewMode
+  onViewModeChange: (next: ExpensesViewMode) => void
+}
+
+function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
   return (
     <div
       className="flex rounded-lg border p-1"
@@ -113,41 +145,38 @@ function ViewToggle() {
         borderColor: 'var(--cozy-border-subtle)',
       }}
     >
-      <button
-        type="button"
-        className="flex items-center gap-1.5 rounded-md px-3 py-1 font-sans text-[11.5px] font-bold text-white shadow-sm"
-        style={{ background: 'var(--terracotta-600)' }}
-        aria-pressed="true"
-      >
+      <ToggleButton active={viewMode === 'table'} onClick={() => onViewModeChange('table')}>
         <LayoutList className="h-3.5 w-3.5" aria-hidden />
         Tabela
-      </button>
-      <button
-        type="button"
-        className="flex items-center gap-1.5 rounded-md px-3 py-1 font-sans text-[11.5px] font-bold"
-        style={{ color: 'var(--cozy-fg-muted)' }}
-        aria-pressed="false"
-      >
+      </ToggleButton>
+      <ToggleButton active={viewMode === 'by-person'} onClick={() => onViewModeChange('by-person')}>
         <Users className="h-3.5 w-3.5" aria-hidden />
         Por pessoa
-      </button>
+      </ToggleButton>
     </div>
   )
 }
 
-function LoadMoreFooter() {
+interface ToggleButtonProps {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}
+
+function ToggleButton({ active, onClick, children }: ToggleButtonProps) {
   return (
-    <div
-      className="flex justify-center border-t px-4 py-3"
-      style={{ borderColor: 'oklch(0.80 0.04 72 / 0.18)' }}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className="flex items-center gap-1.5 rounded-md px-3 py-1 font-sans text-[11.5px] font-bold transition-colors"
+      style={
+        active
+          ? { background: 'var(--terracotta-600)', color: '#fff', boxShadow: 'var(--cozy-shadow-xs)' }
+          : { background: 'transparent', color: 'var(--cozy-fg-muted)' }
+      }
     >
-      <button
-        type="button"
-        className="font-sans text-[12px] font-bold uppercase tracking-wider transition-colors hover:underline"
-        style={{ color: 'var(--amber-700)' }}
-      >
-        Carregar mais despesas
-      </button>
-    </div>
+      {children}
+    </button>
   )
 }
