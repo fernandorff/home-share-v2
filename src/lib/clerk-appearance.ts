@@ -78,17 +78,8 @@ export const clerkCozyAppearance = {
     main: {
       gap: '16px',
     },
-    headerTitle: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 700,
-      fontSize: '32px',
-      letterSpacing: '-0.015em',
-      color: token('fgPrimary'),
-    },
-    headerSubtitle: {
-      color: token('fgSecondary'),
-      fontSize: '14.5px',
-      lineHeight: 1.5,
+    header: {
+      display: 'none',
     },
     socialButtonsBlockButton: {
       border: `1.5px solid ${token('borderHair')}`,
