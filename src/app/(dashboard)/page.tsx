@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Download, Plus } from 'lucide-react'
 import { useGroupContext } from '@/contexts/group-context'
 import { useExpenses } from '@/features/grupos/hooks/useExpenses'
@@ -21,6 +21,7 @@ import { DashboardLoadingSkeleton, DashboardEmptyState } from './_components/Das
 
 export default function DashboardPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { activeGroup, activeGroupPublicId, needsOnboarding, isLoadingGroups } = useGroupContext()
   const {
     expenses: apiExpenses,
@@ -43,6 +44,12 @@ export default function DashboardPage() {
     fetchExpenses({ page: 1, pageSize: 50 })
     fetchBalances()
   }, [activeGroupPublicId, fetchExpenses, fetchBalances])
+
+  useEffect(() => {
+    if (searchParams.get('nova') !== '1') return
+    setExpenseModalOpen(true)
+    router.replace('/', { scroll: false })
+  }, [searchParams, router])
 
   const residents = useMemo(
     () => (activeGroup ? toResidents(activeGroup.members) : []),

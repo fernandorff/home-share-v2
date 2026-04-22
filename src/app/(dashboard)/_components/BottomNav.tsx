@@ -35,7 +35,7 @@ export function BottomNav() {
 
       <div className="-mt-7">
         <Link
-          href="/despesas/nova"
+          href="/?nova=1"
           aria-label="Nova despesa"
           className="flex h-12 w-12 items-center justify-center rounded-full text-white transition-transform active:scale-95"
           style={{
