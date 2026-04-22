@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
-import { ptBR } from '@clerk/localizations'
+import { clerkPtBr } from '@/lib/clerk-localization'
 import { Fredoka, Geist_Mono, Nunito } from 'next/font/google'
 import './globals.css'
 
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
         className={`${fredoka.variable} ${nunito.variable} ${geistMono.variable} min-h-screen antialiased`}
       >
-        <ClerkProvider localization={ptBR}>{children}</ClerkProvider>
+        <ClerkProvider localization={clerkPtBr}>{children}</ClerkProvider>
       </body>
     </html>
   )
