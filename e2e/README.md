@@ -34,14 +34,9 @@ may be needed on Windows and when the dev server grabs a non-default port.
 | `test_proxy_redirects.py` | Clerk middleware redirects + auth-page publicity | 7 |
 | `test_auth_pages.py` | Sign-in / Sign-up visual contracts, ptBR placeholders | 8 |
 | `test_dashboard_shell.py` | Route-group layout, empty states, nav placeholders, mobile FAB href | 11 |
+| `test_dashboard_interactions.py` | Modals (Nova despesa, Settle up), view toggle, kebab menu — uses `page.route` to stub the API | 8 |
 
-## What's NOT covered yet
-
-Interactive dashboard modals (Nova despesa, Por pessoa toggle, Exportar
-CSV menu, Acertar contas) require a real Clerk session plus a seeded
-group with members and expenses. They are tracked in the next
-milestone; manual smoke test instructions live in the project
-`_DOCS/`.
+**Total: 34 checks.**
 
 ## Gotchas
 
