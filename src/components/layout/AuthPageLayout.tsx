@@ -69,7 +69,7 @@ function AuthFormSurface({ children }: { children: React.ReactNode }) {
       style={{ background: 'var(--cozy-surface-raised)' }}
     >
       <DotTextureOverlay />
-      <div className="relative z-10 mx-auto w-full max-w-[420px]">{children}</div>
+      <div className="relative z-10 mx-auto w-full max-w-[460px]">{children}</div>
     </section>
   )
 }
