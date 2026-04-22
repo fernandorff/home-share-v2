@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Download, Plus } from 'lucide-react'
 import { useGroupContext } from '@/contexts/group-context'
@@ -21,6 +21,14 @@ import { toBalanceSummary, toResidents, toUiExpenses } from './_components/dashb
 import { DashboardLoadingSkeleton, DashboardEmptyState } from './_components/DashboardStates'
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoadingSkeleton />}>
+      <DashboardContent />
+    </Suspense>
+  )
+}
+
+function DashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { activeGroup, activeGroupPublicId, needsOnboarding, isLoadingGroups } = useGroupContext()
