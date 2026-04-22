@@ -23,7 +23,7 @@ export function AppFooter() {
         <Home className="h-5 w-5" style={{ color: 'var(--terracotta-700)' }} aria-hidden />
         Home Share
       </div>
-      <p className="font-sans text-sm" style={{ color: 'var(--cozy-fg-muted)' }}>
+      <p className="font-sans text-sm" style={{ color: 'var(--cozy-fg-secondary)' }}>
         © 2026 Home Share. Feito para lares aconchegantes.
       </p>
       <div className="flex gap-6">
@@ -32,7 +32,7 @@ export function AppFooter() {
             key={link.label}
             href={link.href}
             className="font-sans text-sm underline transition-opacity hover:opacity-70"
-            style={{ color: 'var(--cozy-fg-muted)' }}
+            style={{ color: 'var(--cozy-fg-secondary)' }}
           >
             {link.label}
           </a>

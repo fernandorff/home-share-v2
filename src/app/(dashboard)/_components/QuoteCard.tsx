@@ -7,7 +7,8 @@ interface QuoteCardProps {
 /** Small bento card at the bottom of the sidebar with a gentle lifestyle quote. */
 export function QuoteCard({ text }: QuoteCardProps) {
   return (
-    <aside
+    <div
+      role="note"
       className="flex items-center gap-4 rounded-2xl border p-4"
       style={{
         background: 'oklch(0.55 0.05 68 / 0.10)',
@@ -26,6 +27,6 @@ export function QuoteCard({ text }: QuoteCardProps) {
       >
         {text}
       </p>
-    </aside>
+    </div>
   )
 }

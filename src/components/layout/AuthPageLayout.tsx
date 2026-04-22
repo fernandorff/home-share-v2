@@ -18,7 +18,7 @@ interface AuthPageLayoutProps {
  */
 export function AuthPageLayout({ variant, children }: AuthPageLayoutProps) {
   return (
-    <div
+    <main
       className="flex min-h-screen items-center justify-center overflow-x-hidden font-sans md:p-7"
       style={{ background: 'var(--cozy-grad-parchment)' }}
     >
@@ -35,7 +35,7 @@ export function AuthPageLayout({ variant, children }: AuthPageLayoutProps) {
         <MobileBrandBanner variant={variant} />
         <AuthFormSurface>{children}</AuthFormSurface>
       </div>
-    </div>
+    </main>
   )
 }
 
