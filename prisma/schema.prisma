@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  publicId  String   @unique @db.Uuid
+  clerkId   String?  @unique
+  name      String   @map("nome")
+  email     String?
+  isGuest   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships           GroupMember[]
+  expensesPaid          Expense[]            @relation("ExpensePayer")
+  expenseParticipations ExpenseParticipant[]
+  shoppingItemsAdded    ShoppingItem[]
+  invitationsCreated    Invitation[]
+
+  @@index([publicId])
+  @@index([clerkId])
+}
+
+model Group {
+  id          Int      @id @default(autoincrement())
+  publicId    String   @unique @db.Uuid
+  name        String   @map("nome")
+  description String?  @map("descricao")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members       GroupMember[]
+  expenses      Expense[]
+  shoppingItems ShoppingItem[]
+  invitations   Invitation[]
+
+  @@index([publicId])
+}
+
+model GroupMember {
+  id       Int        @id @default(autoincrement())
+  userId   Int
+  groupId  Int
+  role     MemberRole @default(MEMBER)
+  joinedAt DateTime   @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}
+
+enum MemberRole {
+  ADMIN
+  MEMBER
+}
+
+model Invitation {
+  id          Int       @id @default(autoincrement())
+  publicId    String    @unique @db.Uuid
+  groupId     Int
+  createdById Int
+  token       String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+
+  group     Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id])
+
+  @@index([token])
+}
+
+model Platform {
+  id        Int      @id @default(autoincrement())
+  publicId  String   @unique @db.Uuid
+  name      String   @map("nome")
+  createdAt DateTime @default(now())
+
+  expenses Expense[]
+
+  @@index([publicId])
+  @@map("plataforma")
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  publicId    String   @unique @db.Uuid
+  groupId     Int
+  payerId     Int
+  platformId  Int?     @map("plataforma_id")
+  description String   @map("descricao")
+  notes       String?  @map("observacao")
+  amount      Decimal  @db.Decimal(10, 2) @map("valor")
+  date        DateTime @default(now()) @map("data")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  group        Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payer        User                 @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
+  platform     Platform?            @relation(fields: [platformId], references: [id])
+  participants ExpenseParticipant[]
+
+  @@index([publicId])
+}
+
+model ExpenseParticipant {
+  id        Int     @id @default(autoincrement())
+  expenseId Int
+  userId    Int
+  amount    Decimal @db.Decimal(10, 2) @map("valor")
+
+  expense Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, userId])
+}
+
+model ShoppingItem {
+  id          Int      @id @default(autoincrement())
+  publicId    String   @unique @db.Uuid
+  groupId     Int
+  name        String   @map("nome")
+  isPurchased Boolean  @default(false) @map("comprado")
+  createdAt   DateTime @default(now()) @map("criado_em")
+  addedById   Int?     @map("adicionado_por")
+
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  addedBy User? @relation(fields: [addedById], references: [id])
+
+  @@index([publicId])
+  @@index([groupId, isPurchased])
+  @@map("item_compra")
+}

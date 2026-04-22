@@ -1,26 +1,216 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
+/* =========================================================================
+   Cozy Cottage Design System v2 — single source of truth.
+   Every color/space/radius/shadow/motion token lives here and is referenced
+   via var(--cozy-*) across Tailwind utilities, inline styles, and the Clerk
+   appearance API.
+   ========================================================================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Terracotta (primary) — warm clay red */
+  --terracotta-50:  oklch(0.97 0.015 38);
+  --terracotta-100: oklch(0.94 0.028 38);
+  --terracotta-200: oklch(0.88 0.055 38);
+  --terracotta-300: oklch(0.80 0.085 38);
+  --terracotta-400: oklch(0.70 0.115 38);
+  --terracotta-500: oklch(0.62 0.135 38);
+  --terracotta-600: oklch(0.56 0.14 38);   /* brand */
+  --terracotta-700: oklch(0.48 0.125 38);
+  --terracotta-800: oklch(0.40 0.10 38);
+  --terracotta-900: oklch(0.32 0.075 38);
+  --terracotta-950: oklch(0.22 0.05 38);
+
+  /* Amber (warm gold / labels) */
+  --amber-50:  oklch(0.98 0.012 85);
+  --amber-100: oklch(0.95 0.028 82);
+  --amber-200: oklch(0.90 0.055 78);
+  --amber-300: oklch(0.84 0.085 78);
+  --amber-400: oklch(0.78 0.115 78);
+  --amber-500: oklch(0.72 0.125 78);
+  --amber-600: oklch(0.62 0.118 75);       /* label amber */
+  --amber-700: oklch(0.52 0.105 72);
+  --amber-800: oklch(0.42 0.088 68);
+  --amber-900: oklch(0.34 0.068 65);
+  --amber-950: oklch(0.22 0.045 60);
+
+  /* Brown (text + deep) */
+  --brown-50:  oklch(0.97 0.008 60);
+  --brown-100: oklch(0.93 0.014 60);
+  --brown-200: oklch(0.86 0.022 60);
+  --brown-300: oklch(0.76 0.028 60);
+  --brown-400: oklch(0.65 0.035 60);
+  --brown-500: oklch(0.54 0.04 60);
+  --brown-600: oklch(0.45 0.045 60);
+  --brown-700: oklch(0.38 0.045 60);
+  --brown-800: oklch(0.30 0.04 60);
+  --brown-900: oklch(0.24 0.035 60);       /* body text */
+  --brown-950: oklch(0.15 0.025 58);
+
+  /* Sage (success, accent) */
+  --sage-50:  oklch(0.97 0.015 155);
+  --sage-100: oklch(0.93 0.03 155);
+  --sage-200: oklch(0.87 0.055 155);
+  --sage-300: oklch(0.79 0.08 155);
+  --sage-400: oklch(0.70 0.10 155);
+  --sage-500: oklch(0.60 0.115 155);
+  --sage-600: oklch(0.52 0.12 158);
+  --sage-700: oklch(0.44 0.105 158);
+  --sage-800: oklch(0.36 0.085 158);
+  --sage-900: oklch(0.28 0.065 158);
+  --sage-950: oklch(0.18 0.04 158);
+
+  /* Cream / Parchment (neutrals, warm) */
+  --cream-50:  oklch(0.99 0.005 85);
+  --cream-100: oklch(0.975 0.012 85);
+  --cream-200: oklch(0.955 0.020 85);
+  --cream-300: oklch(0.93 0.028 82);
+  --cream-400: oklch(0.89 0.035 80);
+  --cream-500: oklch(0.83 0.042 78);
+  --cream-600: oklch(0.72 0.048 75);
+  --cream-700: oklch(0.60 0.05 72);
+  --cream-800: oklch(0.46 0.045 68);
+  --cream-900: oklch(0.34 0.035 65);
+  --cream-950: oklch(0.22 0.022 60);
+
+  /* Danger (warm terracotta-red) */
+  --danger-50:  oklch(0.97 0.02 28);
+  --danger-100: oklch(0.93 0.04 28);
+  --danger-300: oklch(0.76 0.14 28);
+  --danger-500: oklch(0.58 0.20 28);
+  --danger-600: oklch(0.52 0.22 28);
+  --danger-700: oklch(0.44 0.195 28);
+  --danger-900: oklch(0.30 0.14 28);
+
+  /* ---- Semantic tokens (prefer these over raw scales) ---- */
+  --cozy-surface:        var(--cream-100);
+  --cozy-surface-raised: #fdf9f1;
+  --cozy-surface-inset:  oklch(0.94 0.025 80);
+  --cozy-fg-primary:     var(--brown-900);
+  --cozy-fg-secondary:   oklch(0.40 0.035 60);
+  --cozy-fg-muted:       oklch(0.55 0.04 60 / 0.75);
+  --cozy-fg-label:       var(--amber-700);
+  --cozy-fg-placeholder: oklch(0.65 0.05 75 / 0.55);
+  --cozy-fg-link:        var(--terracotta-700);
+  --cozy-border-hair:    oklch(0.80 0.04 72 / 0.4);
+  --cozy-border-subtle:  oklch(0.75 0.06 72 / 0.35);
+  --cozy-border-strong:  oklch(0.60 0.09 72 / 0.55);
+  --cozy-ring:           oklch(0.72 0.12 75 / 0.55);
+
+  /* ---- Signature gradients ---- */
+  --cozy-grad-parchment: linear-gradient(170deg, #faf3e8 0%, #f5ead6 40%, #f0e4cc 100%);
+  --cozy-grad-card:      linear-gradient(180deg, #fdf8f0 0%, #f7eed9 100%);
+  --cozy-grad-header:    linear-gradient(135deg, oklch(0.56 0.14 38) 0%, oklch(0.52 0.12 42) 45%, oklch(0.58 0.095 60) 100%);
+  --cozy-grad-auth-hero: linear-gradient(135deg, oklch(0.5 0.14 38) 0%, oklch(0.62 0.14 50) 50%, oklch(0.72 0.12 75) 100%);
+  --cozy-grad-btn:       linear-gradient(180deg, oklch(0.60 0.14 38) 0%, oklch(0.54 0.14 38) 100%);
+
+  /* ---- Spacing scale (8pt) ---- */
+  --cozy-space-1:  4px;
+  --cozy-space-2:  8px;
+  --cozy-space-3:  12px;
+  --cozy-space-4:  16px;
+  --cozy-space-5:  20px;
+  --cozy-space-6:  24px;
+  --cozy-space-7:  32px;
+  --cozy-space-8:  40px;
+  --cozy-space-9:  48px;
+  --cozy-space-10: 64px;
+  --cozy-space-11: 80px;
+  --cozy-space-12: 96px;
+  --cozy-space-13: 128px;
+
+  /* ---- Radius scale ---- */
+  --cozy-radius-xs:   4px;
+  --cozy-radius-sm:   6px;
+  --cozy-radius-md:   8px;
+  --cozy-radius-lg:   12px;
+  --cozy-radius-xl:   16px;
+  --cozy-radius-2xl:  20px;
+  --cozy-radius-3xl:  28px;
+  --cozy-radius-full: 9999px;
+
+  /* ---- Shadow scale (always warm terracotta alpha) ---- */
+  --cozy-shadow-xs:  0 1px 2px oklch(0.35 0.1 38 / 0.08);
+  --cozy-shadow-sm:  0 2px 6px oklch(0.35 0.1 38 / 0.08), 0 1px 2px oklch(0.35 0.1 38 / 0.04);
+  --cozy-shadow-md:  0 4px 12px oklch(0.35 0.1 38 / 0.10), 0 2px 4px oklch(0.35 0.1 38 / 0.05);
+  --cozy-shadow-lg:  0 10px 24px oklch(0.35 0.1 38 / 0.12), 0 4px 8px oklch(0.35 0.1 38 / 0.08);
+  --cozy-shadow-xl:  0 20px 40px oklch(0.35 0.1 38 / 0.15), 0 8px 16px oklch(0.35 0.1 38 / 0.10);
+  --cozy-shadow-2xl: 0 32px 64px oklch(0.30 0.12 38 / 0.22), 0 12px 24px oklch(0.35 0.1 38 / 0.12);
+  --cozy-shadow-inset-hi: inset 0 1px 0 oklch(1 0 0 / 0.7);
+  --cozy-shadow-btn:     var(--cozy-shadow-xs), var(--cozy-shadow-inset-hi);
+  --cozy-shadow-card:    var(--cozy-shadow-md), var(--cozy-shadow-inset-hi);
+  --cozy-shadow-focus:   0 0 0 2px var(--cozy-surface), 0 0 0 4px var(--cozy-ring);
+
+  /* ---- Motion tokens ---- */
+  --cozy-dur-instant: 75ms;
+  --cozy-dur-fast:    150ms;
+  --cozy-dur-base:    200ms;
+  --cozy-dur-slow:    300ms;
+  --cozy-dur-slower:  500ms;
+  --cozy-dur-slowest: 800ms;
+  --cozy-ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --cozy-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --cozy-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Expose brand fonts to Tailwind `font-*` utilities. next/font in
+     layout.tsx sets --font-fredoka / --font-nunito / --font-geist-mono. */
+  --font-display: var(--font-fredoka), 'Fredoka', system-ui, sans-serif;
+  --font-sans:    var(--font-nunito),  'Nunito',  system-ui, sans-serif;
+  --font-mono:    var(--font-geist-mono), 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html, body {
+    background: var(--cozy-grad-parchment);
+    color: var(--cozy-fg-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::selection {
+    background: oklch(0.75 0.14 38 / 0.3);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Generic textures composable on any surface. */
+  .cozy-ledger-bg {
+    background-image: repeating-linear-gradient(
+      180deg,
+      transparent,
+      transparent 31px,
+      oklch(0.72 0.12 78 / 0.08) 31px,
+      oklch(0.72 0.12 78 / 0.08) 32px
+    );
+  }
+
+  .cozy-dot-tex {
+    background-image: radial-gradient(oklch(0.7 0.1 75 / 0.22) 0.6px, transparent 0.6px);
+    background-size: 18px 18px;
+  }
+}
+
+/* Signature motion — use via `animation: cozy-fade-up 200ms var(--cozy-ease-out)` etc. */
+@keyframes cozy-fade-up   { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cozy-scale-in  { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes cozy-slide-up  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cozy-drift     { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(12px, -8px); } }
+@keyframes cozy-pulse-dot { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes cozy-shimmer   { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
