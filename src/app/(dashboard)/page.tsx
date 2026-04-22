@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MoreVertical, Plus } from 'lucide-react'
 import { useGroupContext } from '@/contexts/group-context'
@@ -12,6 +12,7 @@ import { BalanceCard } from './_components/BalanceCard'
 import { MembersCard } from './_components/MembersCard'
 import { QuoteCard } from './_components/QuoteCard'
 import { AppFooter } from './_components/AppFooter'
+import { ExpenseFormModal, type ExpenseInput } from './_components/ExpenseFormModal'
 import { DASHBOARD_HEADER, DASHBOARD_QUOTE } from './_components/dashboardMocks'
 import { toBalanceSummary, toResidents, toUiExpenses } from './_components/dashboardAdapters'
 import { DashboardLoadingSkeleton, DashboardEmptyState } from './_components/DashboardStates'
@@ -19,8 +20,17 @@ import { DashboardLoadingSkeleton, DashboardEmptyState } from './_components/Das
 export default function DashboardPage() {
   const router = useRouter()
   const { activeGroup, activeGroupPublicId, needsOnboarding, isLoadingGroups } = useGroupContext()
-  const { expenses: apiExpenses, fetchExpenses } = useExpenses(activeGroupPublicId)
+  const {
+    expenses: apiExpenses,
+    fetchExpenses,
+    createExpense,
+    loading: expensesLoading,
+    error: expensesError,
+    clearError,
+  } = useExpenses(activeGroupPublicId)
   const { settlements, fetchBalances } = useBalances(activeGroupPublicId)
+
+  const [expenseModalOpen, setExpenseModalOpen] = useState(false)
 
   useEffect(() => {
     if (needsOnboarding) router.replace('/onboarding')
@@ -42,13 +52,37 @@ export default function DashboardPage() {
   )
   const balanceSummary = useMemo(() => toBalanceSummary(settlements), [settlements])
 
+  const activeMembers = useMemo(
+    () => (activeGroup?.members ?? []).map((m) => ({ id: m.user.id, name: m.user.name })),
+    [activeGroup],
+  )
+
+  const handleOpenExpenseModal = useCallback(() => {
+    clearError()
+    setExpenseModalOpen(true)
+  }, [clearError])
+
+  const handleCloseExpenseModal = useCallback(() => {
+    setExpenseModalOpen(false)
+  }, [])
+
+  const handleSubmitExpense = useCallback(
+    async (input: ExpenseInput): Promise<boolean> => {
+      const created = await createExpense(input)
+      if (!created) return false
+      fetchBalances()
+      return true
+    },
+    [createExpense, fetchBalances],
+  )
+
   if (isLoadingGroups) return <DashboardLoadingSkeleton />
   if (needsOnboarding) return null
   if (!activeGroup) return <DashboardEmptyState />
 
   return (
     <>
-      <MobileActionRow />
+      <MobileActionRow onCreateExpense={handleOpenExpenseModal} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         <div className="space-y-6 lg:col-span-8">
@@ -58,7 +92,11 @@ export default function DashboardPage() {
               subGreeting={DASHBOARD_HEADER.subGreeting}
             />
           </div>
-          <ExpensesCard expenses={uiExpenses} residents={residents} />
+          <ExpensesCard
+            expenses={uiExpenses}
+            residents={residents}
+            onCreateExpense={handleOpenExpenseModal}
+          />
         </div>
 
         <aside className="hidden space-y-6 lg:col-span-4 lg:block">
@@ -71,15 +109,29 @@ export default function DashboardPage() {
       </div>
 
       <AppFooter />
+
+      <ExpenseFormModal
+        open={expenseModalOpen}
+        onClose={handleCloseExpenseModal}
+        members={activeMembers}
+        onSubmit={handleSubmitExpense}
+        loading={expensesLoading}
+        error={expensesError}
+      />
     </>
   )
 }
 
-function MobileActionRow() {
+interface MobileActionRowProps {
+  onCreateExpense: () => void
+}
+
+function MobileActionRow({ onCreateExpense }: MobileActionRowProps) {
   return (
     <div className="mb-5 flex gap-3 md:hidden">
       <button
         type="button"
+        onClick={onCreateExpense}
         className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 px-6 py-3 font-display font-bold transition-transform active:scale-95"
         style={{
           borderColor: 'var(--terracotta-600)',
